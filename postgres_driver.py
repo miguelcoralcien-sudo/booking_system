@@ -20,7 +20,34 @@ def get_db_connection():
         return None
 
 def init_db():
+    """Автосоздание таблиц при первом запуске."""
     conn = get_db_connection()
     if conn:
-        print("База данных 'booking_db' успешно подключена!")
-        conn.close()
+        try:
+            with conn, conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        id SERIAL PRIMARY KEY,
+                        name TEXT NOT NULL,
+                        phone TEXT NOT NULL
+                    );
+                    CREATE TABLE IF NOT EXISTS tables (
+                        id SERIAL PRIMARY KEY,
+                        table_number INT UNIQUE NOT NULL,
+                        capacity INT NOT NULL CHECK (capacity > 0)
+                    );
+                    CREATE TABLE IF NOT EXISTS bookings (
+                        id SERIAL PRIMARY KEY,
+                        user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        table_id INT NOT NULL REFERENCES tables(id) ON DELETE CASCADE,
+                        booking_date DATE NOT NULL,
+                        start_time TIME NOT NULL,
+                        end_time TIME NOT NULL
+                    );
+                """)
+                conn.commit()
+                print("✅ Таблицы users, tables, bookings созданы (или уже существуют).")
+        except Error as e:
+            print(f"Ошибка создания таблиц: {e}")
+        finally:
+            conn.close()

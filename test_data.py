@@ -1,6 +1,10 @@
+from postgres_driver import init_db
 from backend import create_user, create_table, create_booking, get_all_bookings
 
-print("=== Добавляем пользователей ===")
+print("=== Запуск автосоздания таблиц ===")
+init_db()
+
+print("\n=== Добавляем пользователей ===")
 user1 = create_user("Алиса", "+79001111111")
 user2 = create_user("Боб", "+79002222222")
 user3 = create_user("Чарли", "+79003333333")
