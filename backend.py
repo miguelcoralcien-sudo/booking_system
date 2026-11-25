@@ -180,12 +180,16 @@ def update_booking(booking_id, user_id=None, table_id=None, booking_date=None, s
                     print("Бронирование не найдено.")
                     return
                 uid, tid, bd, st, et = row
+                new_tid = table_id or tid
+                new_bd = booking_date or bd
+                new_st = start_time or st
+                new_et = end_time or et
+                if (table_id or booking_date or start_time or end_time):
+                    if not check_table_availability(new_tid, new_bd, new_st, new_et):
+                        print("❌ Обновление отменено: стол занят в это время!")
+                        return
                 uid = user_id or uid
-                tid = table_id or tid
-                bd = booking_date or bd
-                st = start_time or st
-                et = end_time or et
-                cur.execute("UPDATE bookings SET user_id=%s, table_id=%s, booking_date=%s, start_time=%s, end_time=%s WHERE id=%s", (uid, tid, bd, st, et, booking_id))
+                cur.execute("UPDATE bookings SET user_id=%s, table_id=%s, booking_date=%s, start_time=%s, end_time=%s WHERE id=%s", (uid, new_tid, new_bd, new_st, new_et, booking_id))
                 conn.commit()
                 print(f"Бронирование ID {booking_id} обновлено.")
         except Exception as e:
